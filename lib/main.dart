@@ -1,4 +1,7 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,6 +28,15 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var nameController = TextEditingController();
+  static const String KEYVALUE = 'value';
+  var savedValue = 'No Saved Value';
+
+  @override
+  void initState() {
+    super.initState();
+
+    getValue();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,10 +56,16 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                label: Text('Enter Value'),
+            Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  label: Text('Enter Value'),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  )
+                ),
               ),
             ),
             const SizedBox(
@@ -55,7 +73,12 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                onPressed: () {},
+                onPressed: () async {
+                  var value = nameController.text.toString();
+
+                  var prefs = await SharedPreferences.getInstance();
+                  prefs.setString(KEYVALUE, value);
+                },
                 child: const Text(
                   'Save',
                   style: TextStyle(
@@ -67,9 +90,9 @@ class _MyHomePageState extends State<MyHomePage> {
             const SizedBox(
               height: 10,
             ),
-            const Text(
-              'Value',
-              style: TextStyle(
+            Text(
+              savedValue,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
@@ -79,5 +102,14 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
+  }
+
+  void getValue() async{
+    var prefs = await SharedPreferences.getInstance();
+    var value = prefs.getString(KEYVALUE);
+
+    setState(() {
+      savedValue = value ?? 'No Saved Value';
+    });
   }
 }
